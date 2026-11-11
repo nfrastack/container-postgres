@@ -1,3 +1,8 @@
+## 18-3.3.5 2026-11-11 <code at nfrastack dot com>
+
+   ### Added
+      - Postgresql 18.7
+
 ## 18-3.3.4 2026-08-11 <code at nfrastack dot com>
 
    ### Added
