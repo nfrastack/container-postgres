@@ -18,7 +18,7 @@ LABEL \
         org.opencontainers.image.licenses="MIT"
 
 ARG \
-    POSTGRES_VERSION="REL_18_7" \
+    POSTGRES_VERSION="REL_19_0" \
     POSTGRES_REPO_URL="https://github.com/postgres/postgres" \
     POSTGRES_ZABBIX_PLUGIN_VERSION
 
@@ -33,20 +33,23 @@ ENV \
 RUN echo "" && \
     POSTGRES_BUILD_DEPS_ALPINE=" \
                                     bison \
-                                    clang20 \
+                                    clang22 \
                                     coreutils \
+                                    curl-dev \
                                     dpkg-dev \
                                     dpkg \
                                     flex \
                                     g++ \
                                     gcc \
                                     icu-dev \
+                                    krb5-dev \
                                     libc-dev \
                                     libedit-dev \
+                                    liburing-dev \
                                     libxml2-dev \
                                     libxslt-dev \
                                     linux-headers \
-                                    llvm20-dev \
+                                    llvm22-dev \
                                     lz4-dev \
                                     make \
                                     openldap-dev \
@@ -70,9 +73,12 @@ RUN echo "" && \
     POSTGRES_RUN_DEPS_ALPINE=" \
                                 icu-data-full \
                                 icu-libs \
+                                krb5-libs \
+                                libcurl \
                                 libldap \
                                 libpq \
-                                llvm20 \
+                                liburing \
+                                llvm22 \
                                 lz4-libs \
                                 musl-locales \
                                 openssl \
@@ -109,8 +115,10 @@ RUN echo "" && \
     awk '$1 == "#define" && $2 == "DEFAULT_PGSOCKET_DIR" && $3 == "\"/tmp\"" { $3 = "\"/var/run/postgresql\""; print; next } { print }' src/include/pg_config_manual.h > src/include/pg_config_manual.h.new && \
     grep '/var/run/postgresql' src/include/pg_config_manual.h.new && \
     mv src/include/pg_config_manual.h.new src/include/pg_config_manual.h && \
-    export LLVM_CONFIG="/usr/lib/llvm20/bin/llvm-config" && \
-    export CLANG=clang-20 && \
+    export LLVM_CONFIG="/usr/lib/llvm22/bin/llvm-config" && \
+    export CLANG=clang-22 && \
+    case "$(dpkg-architecture --query DEB_BUILD_ARCH 2>/dev/null || uname -m)" in amd64|x86_64) export CFLAGS="-O3 -march=x86-64-v2 -mtune=generic" ;; *) export CFLAGS="-O3" ;; esac && \
+    export LDFLAGS="-Wl,-O1 -Wl,--as-needed" && \
     ./configure \
         --build="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
         --prefix=/usr/local \
@@ -123,8 +131,11 @@ RUN echo "" && \
         --enable-thread-safety \
         --enable-tap-tests \
         --with-gnu-ld \
+        --with-gssapi \
         --with-icu \
         --with-ldap \
+        --with-libcurl \
+        --with-liburing \
         --with-libxml \
         --with-libxslt \
         --with-llvm \
