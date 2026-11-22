@@ -1,3 +1,10 @@
+## 19-3.4.0 2026-11-22 <code at nfrastack dot com>
+
+   ### Added
+      - Postgresql 19.0.0
+      - Build with architectur optimization o3
+
+
 ## 18-3.3.5 2026-11-11 <code at nfrastack dot com>
 
    ### Added
